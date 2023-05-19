@@ -10,9 +10,9 @@ const double kSmallestNegativeFloatValue = -1.175494351e-38;        /* min negat
 const double kPi = 3.14159265358979323846264338327950288419716939937510582097494459230781640628620899;
 
 
-enum filterCoeff { a0, a1, a2, b1, b2, numCoeffs };
+enum filterCoeff { a0, a1, a2, b1, b2, c0, d0, numCoeffs };
 enum stateReg { x_z1, x_z2, y_z1, y_z2, numStates };
-enum class filterAlgorithm { kLPF1, kHPF1, kLPF2, kHPF2, kBPF2, kBSF2, kLowShelf, kHiShelf, kCQParaEQ };
+enum class filterAlgorithm { kLPF1, kHPF1, kLPF2, kHPF2, kBPF2, kBSF2, kLowShelf, kHiShelf, kNCQParaEQ, kCQParaEQ };
 
 
 inline bool checkFloatUnderflow(double& value) {
@@ -54,7 +54,7 @@ public:
   }
 
 protected:
-  double coeffArray[numCoeffs] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
+  double coeffArray[numCoeffs] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
   double stateArray[numStates] = { 0.0, 0.0, 0.0, 0.0 };
 };
 
@@ -78,7 +78,7 @@ public:
 
 protected:
   Biquad biquad;
-  double coeffArray[numCoeffs] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
+  double coeffArray[numCoeffs] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
   
   double sampleRate = 44100.0;
   

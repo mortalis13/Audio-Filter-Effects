@@ -21,7 +21,7 @@ double Biquad::processAudioSample(double xn) {
 
 
 double AudioFilter::processAudioSample(double xn) {
-  return biquad.processAudioSample(xn);
+  return coeffArray[d0] * xn + coeffArray[c0] * biquad.processAudioSample(xn);
 }
 
 
@@ -140,6 +140,9 @@ bool AudioFilter::calculateFilterCoeffs() {
     coeffArray[a2] = 0.0;
     coeffArray[b1] = -gamma;
     coeffArray[b2] = 0.0;
+    
+    coeffArray[c0] = mu - 1.0;
+    coeffArray[d0] = 1.0;
 
     biquad.setCoefficients(coeffArray);
     return true;
@@ -158,6 +161,38 @@ bool AudioFilter::calculateFilterCoeffs() {
     coeffArray[a2] = 0.0;
     coeffArray[b1] = -gamma;
     coeffArray[b2] = 0.0;
+    
+    coeffArray[c0] = mu - 1.0;
+    coeffArray[d0] = 1.0;
+
+    biquad.setCoefficients(coeffArray);
+    return true;
+  }
+  
+  else if (algorithm == filterAlgorithm::kNCQParaEQ)
+  {
+    double theta_c = 2.0 * kPi * fc / sampleRate;
+    double mu = pow(10.0, boostCut_dB / 20.0);
+
+    double tanArg = theta_c / (2.0 * Q);
+    if (tanArg >= 0.95 * kPi / 2.0) tanArg = 0.95 * kPi / 2.0;
+
+    double zeta = 4.0 / (1.0 + mu);
+    double betaNumerator = 1.0 - zeta * tan(tanArg);
+    double betaDenominator = 1.0 + zeta * tan(tanArg);
+
+    double beta = 0.5 * (betaNumerator / betaDenominator);
+    double gamma = (0.5 + beta) * (cos(theta_c));
+    double alpha = (0.5 - beta);
+
+    coeffArray[a0] = alpha;
+    coeffArray[a1] = 0.0;
+    coeffArray[a2] = -alpha;
+    coeffArray[b1] = -2.0 * gamma;
+    coeffArray[b2] = 2.0 * beta;
+
+    coeffArray[c0] = mu - 1.0;
+    coeffArray[d0] = 1.0;
 
     biquad.setCoefficients(coeffArray);
     return true;
@@ -166,7 +201,6 @@ bool AudioFilter::calculateFilterCoeffs() {
   else if (algorithm == filterAlgorithm::kCQParaEQ) {
     double K = tan(kPi * fc / sampleRate);
     double Vo = pow(10.0, boostCut_dB / 20.0);
-    bool bBoost = boostCut_dB >= 0 ? true : false;
 
     double d0 = 1.0 + (1.0 / Q) * K + K * K;
     double e0 = 1.0 + (1.0 / (Vo * Q)) * K + K * K;
