@@ -1,6 +1,7 @@
 #ifndef FILTER_FX_H
 #define FILTER_FX_H
 
+#include <string.h>
 #include <stdint.h>
 #include <math.h>
 
