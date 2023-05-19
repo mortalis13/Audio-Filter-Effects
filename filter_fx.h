@@ -10,7 +10,7 @@ const double kSmallestNegativeFloatValue = -1.175494351e-38;        /* min negat
 const double kPi = 3.14159265358979323846264338327950288419716939937510582097494459230781640628620899;
 
 
-enum class filterAlgorithm { kLPF1, kHPF1, kLPF2, kHPF2, kBPF2, kBSF2, kLowShelf, kHiShelf, kNCQParaEQ, kCQParaEQ };
+enum class FilterAlgorithm { kLPF1, kHPF1, kLPF2, kHPF2, kBPF2, kBSF2, kLowShelf, kHiShelf, kNCQParaEQ, kCQParaEQ };
 
 
 inline bool checkFloatUnderflow(double& value) {
@@ -32,14 +32,32 @@ public:
   AudioFilter() {}
   ~AudioFilter() {}
 
-  bool reset(double _sampleRate) {
-    sampleRate = _sampleRate;
+  void reset() {
     resetStates();
-    return true;
   }
 
-  void setSampleRate(double _sampleRate) {
-    sampleRate = _sampleRate;
+  void setSampleRate(double sampleRate) {
+    this->sampleRate = sampleRate;
+    calculateFilterCoeffs();
+  }
+  
+  void setFilterType(FilterAlgorithm algorithm) {
+    this->algorithm = algorithm;
+    calculateFilterCoeffs();
+  }
+  
+  void setCornerFrequency(double frequency) {
+    this->fc = frequency;
+    calculateFilterCoeffs();
+  }
+  
+  void setQualityFactor(double qFactor) {
+    this->Q = qFactor;
+    calculateFilterCoeffs();
+  }
+  
+  void setDb(double db) {
+    this->db = db;
     calculateFilterCoeffs();
   }
   
@@ -62,10 +80,10 @@ protected:
   
   double sampleRate = 44100.0;
   
-  filterAlgorithm algorithm = filterAlgorithm::kLPF1;
+  FilterAlgorithm algorithm;
   double fc = 100.0;
   double Q = 0.707;
-  double boostCut_dB = 0.0;
+  double db = 0.0;
 
   bool calculateFilterCoeffs();
   

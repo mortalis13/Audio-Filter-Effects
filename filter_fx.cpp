@@ -23,7 +23,7 @@ bool AudioFilter::calculateFilterCoeffs() {
 
   cf_a0 = 1.0;
 
-  if (algorithm == filterAlgorithm::kLPF1) {
+  if (algorithm == FilterAlgorithm::kLPF1) {
     double theta_c = 2.0 * kPi * fc / sampleRate;
     double gamma = cos(theta_c) / (1.0 + sin(theta_c));
 
@@ -36,7 +36,7 @@ bool AudioFilter::calculateFilterCoeffs() {
     return true;
   }
   
-  else if (algorithm == filterAlgorithm::kHPF1) {
+  else if (algorithm == FilterAlgorithm::kHPF1) {
     double theta_c = 2.0 * kPi * fc / sampleRate;
     double gamma = cos(theta_c) / (1.0 + sin(theta_c));
 
@@ -49,7 +49,7 @@ bool AudioFilter::calculateFilterCoeffs() {
     return true;
   }
   
-  else if (algorithm == filterAlgorithm::kLPF2) {
+  else if (algorithm == FilterAlgorithm::kLPF2) {
     double theta_c = 2.0 * kPi * fc / sampleRate;
     double d = 1.0 / Q;
     double betaNumerator = 1.0 - ((d / 2.0) * (sin(theta_c)));
@@ -68,7 +68,7 @@ bool AudioFilter::calculateFilterCoeffs() {
     return true;
   }
   
-  else if (algorithm == filterAlgorithm::kHPF2) {
+  else if (algorithm == FilterAlgorithm::kHPF2) {
     double theta_c = 2.0 * kPi * fc / sampleRate;
     double d = 1.0 / Q;
 
@@ -88,7 +88,7 @@ bool AudioFilter::calculateFilterCoeffs() {
     return true;
   }
   
-  else if (algorithm == filterAlgorithm::kBPF2) {
+  else if (algorithm == FilterAlgorithm::kBPF2) {
     double K = tan(kPi * fc / sampleRate);
     double delta = K * K * Q + K + Q;
 
@@ -101,7 +101,7 @@ bool AudioFilter::calculateFilterCoeffs() {
     return true;
   }
   
-  else if (algorithm == filterAlgorithm::kBSF2) {
+  else if (algorithm == FilterAlgorithm::kBSF2) {
     double K = tan(kPi * fc / sampleRate);
     double delta = K * K * Q + K + Q;
 
@@ -114,9 +114,9 @@ bool AudioFilter::calculateFilterCoeffs() {
     return true;
   }
   
-  else if (algorithm == filterAlgorithm::kLowShelf) {
+  else if (algorithm == FilterAlgorithm::kLowShelf) {
     double theta_c = 2.0 * kPi * fc / sampleRate;
-    double mu = pow(10.0, boostCut_dB / 20.0);
+    double mu = pow(10.0, db / 20.0);
 
     double beta = 4.0 / (1.0 + mu);
     double delta = beta * tan(theta_c / 2.0);
@@ -134,9 +134,9 @@ bool AudioFilter::calculateFilterCoeffs() {
     return true;
   }
   
-  else if (algorithm == filterAlgorithm::kHiShelf) {
+  else if (algorithm == FilterAlgorithm::kHiShelf) {
     double theta_c = 2.0 * kPi * fc / sampleRate;
-    double mu = pow(10.0, boostCut_dB / 20.0);
+    double mu = pow(10.0, db / 20.0);
 
     double beta = (1.0 + mu) / 4.0;
     double delta = beta * tan(theta_c / 2.0);
@@ -154,10 +154,10 @@ bool AudioFilter::calculateFilterCoeffs() {
     return true;
   }
   
-  else if (algorithm == filterAlgorithm::kNCQParaEQ)
+  else if (algorithm == FilterAlgorithm::kNCQParaEQ)
   {
     double theta_c = 2.0 * kPi * fc / sampleRate;
-    double mu = pow(10.0, boostCut_dB / 20.0);
+    double mu = pow(10.0, db / 20.0);
 
     double tanArg = theta_c / (2.0 * Q);
     if (tanArg >= 0.95 * kPi / 2.0) tanArg = 0.95 * kPi / 2.0;
@@ -182,9 +182,9 @@ bool AudioFilter::calculateFilterCoeffs() {
     return true;
   }
   
-  else if (algorithm == filterAlgorithm::kCQParaEQ) {
+  else if (algorithm == FilterAlgorithm::kCQParaEQ) {
     double K = tan(kPi * fc / sampleRate);
-    double Vo = pow(10.0, boostCut_dB / 20.0);
+    double Vo = pow(10.0, db / 20.0);
 
     double d0 = 1.0 + (1.0 / Q) * K + K * K;
     double e0 = 1.0 + (1.0 / (Vo * Q)) * K + K * K;
@@ -194,7 +194,7 @@ bool AudioFilter::calculateFilterCoeffs() {
     double delta = 1.0 - (1.0 / Q) * K + K * K;
     double eta = 1.0 - (1.0 / (Vo * Q)) * K + K * K;
     
-    if (boostCut_dB >= 0) {
+    if (db >= 0) {
       cf_a0 = alpha / d0;
       cf_a1 = beta  / d0;
       cf_a2 = gamma / d0;
