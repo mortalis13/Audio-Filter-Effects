@@ -29,56 +29,27 @@ inline bool checkFloatUnderflow(double& value) {
 }
 
 
-class IAudioSignalProcessor {
-public:
-  virtual bool reset(double _sampleRate) = 0;
-  virtual void setSampleRate(double _sampleRate) {}
-  virtual double processAudioSample(double xn) = 0;
-};
-
-
-class Biquad : public IAudioSignalProcessor {
-public:
-  Biquad() {}
-  ~Biquad() {}
-
-  virtual bool reset(double _sampleRate) {
-    memset(&stateArray[0], 0, sizeof(double) * numStates);
-    return true;
-  }
-  
-  virtual double processAudioSample(double xn);
-
-  void setCoefficients(double* coeffs) {
-    memcpy(&coeffArray[0], &coeffs[0], sizeof(double) * numCoeffs);
-  }
-
-protected:
-  double coeffArray[numCoeffs] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-  double stateArray[numStates] = { 0.0, 0.0, 0.0, 0.0 };
-};
-
-
-class AudioFilter : public IAudioSignalProcessor {
+class AudioFilter {
 public:
   AudioFilter() {}
   ~AudioFilter() {}
 
-  virtual bool reset(double _sampleRate) {
+  bool reset(double _sampleRate) {
     sampleRate = _sampleRate;
-    return biquad.reset(_sampleRate);
+    memset(&stateArray[0], 0, sizeof(double) * numStates);
+    return true;
   }
 
-  virtual void setSampleRate(double _sampleRate) {
+  void setSampleRate(double _sampleRate) {
     sampleRate = _sampleRate;
     calculateFilterCoeffs();
   }
   
-  virtual double processAudioSample(double xn);
+  double processAudioSample(double xn);
 
 protected:
-  Biquad biquad;
   double coeffArray[numCoeffs] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+  double stateArray[numStates] = { 0.0, 0.0, 0.0, 0.0 };
   
   double sampleRate = 44100.0;
   

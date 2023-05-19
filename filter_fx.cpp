@@ -3,7 +3,8 @@
 #include "filter_fx.h"
 
 
-double Biquad::processAudioSample(double xn) {
+double AudioFilter::processAudioSample(double xn) {
+  // Biquad calc
   double yn = coeffArray[a0] * xn +
         coeffArray[a1] * stateArray[x_z1] + coeffArray[a2] * stateArray[x_z2] -
         coeffArray[b1] * stateArray[y_z1] - coeffArray[b2] * stateArray[y_z2];
@@ -15,13 +16,8 @@ double Biquad::processAudioSample(double xn) {
 
   stateArray[y_z2] = stateArray[y_z1];
   stateArray[y_z1] = yn;
-
-  return yn;
-}
-
-
-double AudioFilter::processAudioSample(double xn) {
-  return coeffArray[d0] * xn + coeffArray[c0] * biquad.processAudioSample(xn);
+  
+  return coeffArray[d0] * xn + coeffArray[c0] * yn;
 }
 
 
@@ -40,7 +36,6 @@ bool AudioFilter::calculateFilterCoeffs() {
     coeffArray[b1] = -gamma;
     coeffArray[b2] = 0.0;
 
-    biquad.setCoefficients(coeffArray);
     return true;
   }
   
@@ -54,7 +49,6 @@ bool AudioFilter::calculateFilterCoeffs() {
     coeffArray[b1] = -gamma;
     coeffArray[b2] = 0.0;
 
-    biquad.setCoefficients(coeffArray);
     return true;
   }
   
@@ -74,7 +68,6 @@ bool AudioFilter::calculateFilterCoeffs() {
     coeffArray[b1] = -2.0 * gamma;
     coeffArray[b2] = 2.0 * beta;
 
-    biquad.setCoefficients(coeffArray);
     return true;
   }
   
@@ -95,7 +88,6 @@ bool AudioFilter::calculateFilterCoeffs() {
     coeffArray[b1] = -2.0 * gamma;
     coeffArray[b2] = 2.0 * beta;
 
-    biquad.setCoefficients(coeffArray);
     return true;
   }
   
@@ -109,7 +101,6 @@ bool AudioFilter::calculateFilterCoeffs() {
     coeffArray[b1] = 2.0 * Q * (K * K - 1) / delta;
     coeffArray[b2] = (K * K * Q - K + Q) / delta;
 
-    biquad.setCoefficients(coeffArray);
     return true;
   }
   
@@ -123,7 +114,6 @@ bool AudioFilter::calculateFilterCoeffs() {
     coeffArray[b1] = 2.0 * Q * (K * K - 1) / delta;
     coeffArray[b2] = (K * K * Q - K + Q) / delta;
 
-    biquad.setCoefficients(coeffArray);
     return true;
   }
   
@@ -144,7 +134,6 @@ bool AudioFilter::calculateFilterCoeffs() {
     coeffArray[c0] = mu - 1.0;
     coeffArray[d0] = 1.0;
 
-    biquad.setCoefficients(coeffArray);
     return true;
   }
   
@@ -165,7 +154,6 @@ bool AudioFilter::calculateFilterCoeffs() {
     coeffArray[c0] = mu - 1.0;
     coeffArray[d0] = 1.0;
 
-    biquad.setCoefficients(coeffArray);
     return true;
   }
   
@@ -194,7 +182,6 @@ bool AudioFilter::calculateFilterCoeffs() {
     coeffArray[c0] = mu - 1.0;
     coeffArray[d0] = 1.0;
 
-    biquad.setCoefficients(coeffArray);
     return true;
   }
   
@@ -233,7 +220,6 @@ bool AudioFilter::calculateFilterCoeffs() {
     coeffArray[b1] = val_b1;
     coeffArray[b2] = val_b2;
 
-    biquad.setCoefficients(coeffArray);
     return true;
   }
 
