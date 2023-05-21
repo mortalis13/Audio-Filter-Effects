@@ -18,8 +18,6 @@ double AudioFilter::processAudioSample(double xn) {
 
 
 void LowPassFilter::calculateFilterCoeffs() {
-  resetCoeffs();
-
   double theta_c = 2.0 * kPi * fc / sampleRate;
   
   if (order == 1) {
@@ -50,8 +48,6 @@ void LowPassFilter::calculateFilterCoeffs() {
 
 
 void HighPassFilter::calculateFilterCoeffs() {
-  resetCoeffs();
-  
   double theta_c = 2.0 * kPi * fc / sampleRate;
   
   if (order == 1) {
@@ -83,8 +79,6 @@ void HighPassFilter::calculateFilterCoeffs() {
 
 
 void BandFilter::calculateFilterCoeffs() {
-  resetCoeffs();
-  
   double K = tan(kPi * fc / sampleRate);
   double delta = K * K * Q + K + Q;
   
@@ -105,8 +99,6 @@ void BandFilter::calculateFilterCoeffs() {
 }
 
 void ShelfFilter::calculateFilterCoeffs() {
-  resetCoeffs();
-  
   double theta_c = 2.0 * kPi * fc / sampleRate;
   double mu = pow(10.0, db / 20.0);
   
@@ -143,10 +135,8 @@ void ShelfFilter::calculateFilterCoeffs() {
 
 
 void PeakingFilter::calculateFilterCoeffs() {
-  bool constQ = false;
-
-  // Non constant Q
   if (!constQ) {
+    // Non constant Q
     double theta_c = 2.0 * kPi * fc / sampleRate;
     double mu = pow(10.0, db / 20.0);
 

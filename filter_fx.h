@@ -1,14 +1,18 @@
 #ifndef FILTER_FX_H
 #define FILTER_FX_H
 
-#include <string.h>
 #include <stdint.h>
 #include <math.h>
-
 
 const double kSmallestPositiveFloatValue = 1.175494351e-38;         /* min positive value */
 const double kSmallestNegativeFloatValue = -1.175494351e-38;        /* min negative value */
 const double kPi = 3.14159265358979323846264338327950288419716939937510582097494459230781640628620899;
+
+const double DEFAULT_Q = 0.707;
+const double MIN_FREQUENCY = 20.0;
+const double MAX_FREQUENCY = 20480.0;
+const double MIN_GAIN = -20.0;
+const double MAX_GAIN = 20.0;
 
 
 inline bool checkFloatUnderflow(double& value) {
@@ -28,7 +32,7 @@ inline bool checkFloatUnderflow(double& value) {
 class AudioFilter {
 public:
   AudioFilter() {}
-  ~AudioFilter() {}
+  virtual ~AudioFilter() = default;
 
   void reset() {
     resetStates();
@@ -39,8 +43,23 @@ public:
     calculateFilterCoeffs();
   }
   
+  virtual void setQFactor(double qFactor) {
+    if (qFactor <= 0) qFactor = DEFAULT_Q;
+    this->Q = qFactor;
+    calculateFilterCoeffs();
+  }
+  
   void setFrequency(double frequency) {
+    frequency = fmin(fmax(frequency, MIN_FREQUENCY), MAX_FREQUENCY);
+    if (this->fc == frequency) return;
     this->fc = frequency;
+    calculateFilterCoeffs();
+  }
+  
+  virtual void setGainDb(double db) {
+    db = fmin(fmax(db, MIN_GAIN), MAX_GAIN);
+    if (this->db == db) return;
+    this->db = db;
     calculateFilterCoeffs();
   }
   
@@ -49,21 +68,18 @@ public:
 protected:
   virtual void calculateFilterCoeffs() = 0;
   
-  void resetCoeffs() {
-    cf_a0 = cf_a1 = cf_a2 = cf_b1 = cf_b2 = cf_c0 = cf_d0 = 0.0;
-  }
-  
   void resetStates() {
     x_z1 = x_z2 = y_z1 = y_z2 = 0.0;
   }
 
+protected:
   double cf_a0 = 0.0;
   double cf_a1 = 0.0;
   double cf_a2 = 0.0;
   double cf_b1 = 0.0;
   double cf_b2 = 0.0;
 
-  double cf_c0 = 0.0;
+  double cf_c0 = 1.0;
   double cf_d0 = 0.0;
   
   double x_z1 = 0.0;
@@ -72,8 +88,10 @@ protected:
   double y_z2 = 0.0;
   
   double sampleRate = 44100.0;
+  double Q = DEFAULT_Q;
   
   double fc = 100.0;
+  double db = 0.0;
 };
 
 
@@ -84,15 +102,11 @@ public:
     this->order = order;
     calculateFilterCoeffs();
   }
-  void setQFactor(double qFactor) {
-    this->Q = qFactor;
-    calculateFilterCoeffs();
-  }
+  virtual void setGainDb(double db) {/* N/A */}
 protected:
   virtual void calculateFilterCoeffs();
 private:
   int order = 1;
-  double Q = 0.707;
 };
 
 
@@ -103,15 +117,11 @@ public:
     this->order = order;
     calculateFilterCoeffs();
   }
-  void setQFactor(double qFactor) {
-    this->Q = qFactor;
-    calculateFilterCoeffs();
-  }
+  virtual void setGainDb(double db) {/* N/A */}
 protected:
   virtual void calculateFilterCoeffs();
 private:
   int order = 1;
-  double Q = 0.707;
 };
 
 
@@ -122,15 +132,11 @@ public:
     this->type = type;
     calculateFilterCoeffs();
   }
-  void setQFactor(double qFactor) {
-    this->Q = qFactor;
-    calculateFilterCoeffs();
-  }
+  virtual void setGainDb(double db) {/* N/A */}
 protected:
   virtual void calculateFilterCoeffs();
 private:
   FilterType type = BandPass;
-  double Q = 0.707;
 };
 
 
@@ -141,33 +147,19 @@ public:
     this->type = type;
     calculateFilterCoeffs();
   }
-  void setDB(double db) {
-    this->db = db;
-    calculateFilterCoeffs();
-  }
+  virtual void setQFactor(double qFactor) {/* N/A */}
 protected:
   virtual void calculateFilterCoeffs();
 private:
   FilterType type = LowShelf;
-  double db = 0.0;
 };
 
 
 class PeakingFilter : public AudioFilter {
-public:
-  void setQFactor(double qFactor) {
-    this->Q = qFactor;
-    calculateFilterCoeffs();
-  }
-  void setDB(double db) {
-    this->db = db;
-    calculateFilterCoeffs();
-  }
 protected:
   virtual void calculateFilterCoeffs();
 private:
-  double Q = 0.707;
-  double db = 0.0;
+  bool constQ = false;
 };
 
 #endif //FILTER_FX_H
